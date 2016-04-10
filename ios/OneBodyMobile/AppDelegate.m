@@ -11,6 +11,8 @@
 
 #import "RCTRootView.h"
 
+#import "RCTWebViewProxyManager.h"
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions

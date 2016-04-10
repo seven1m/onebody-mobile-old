@@ -11,21 +11,31 @@ import React, {
   WebView
 } from 'react-native';
 
+import WebViewProxy from './ios/web_view_proxy';
+
 class OneBodyMobile extends Component {
   constructor() {
     super();
     this.state = {
       url: '',
       go: false,
-      loaded: false
+      loaded: false,
+      html: '',
+      baseUrl: ''
     };
   }
 
   componentDidMount() {
+    WebViewProxy.setup();
     AsyncStorage.multiGet(['url', 'go'], (err, result) => {
       const [[,url], [,go]] = result;
-      this.setState({url, go: go == 'true', loaded: true});
+      const goBool = (go == 'true');
+      this.setState({url, go: goBool, loaded: true});
     });
+  }
+
+  componentWillUnmount() {
+    WebViewProxy.teardown();
   }
 
   render() {
@@ -33,7 +43,14 @@ class OneBodyMobile extends Component {
       return <View/>;
     } else if (this.state.go) {
       return (
-        <WebView style={styles.webView} source={{url: this.state.url}}/>
+        <View style={styles.containerStretch}>
+          <WebView
+            startInLoadingState={true}
+            style={styles.webView}
+            source={{url: this.state.go ? this.state.url : null}}
+            onLoadHtml={this.handleLoadHtml.bind(this)}/>
+          <Text>nice</Text>
+        </View>
       );
     } else {
       return (
@@ -55,6 +72,7 @@ class OneBodyMobile extends Component {
             placeholder="members.mychurch.com"
             keyboardType="url"
             onChange={(e) => this.setState({url: e.nativeEvent.text})}
+            autoCorrect={false}
             autoCapitalize="none"
             autoFocus/>
           <TouchableHighlight
@@ -75,16 +93,25 @@ class OneBodyMobile extends Component {
     this.setState({url, go: true});
     AsyncStorage.multiSet([['url', url], ['go', 'true']]);
   }
+
+  handleLoadHtml(html) {
+    return html.replace(/<header[^]*<\/header>/m, '');
+  }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#fff',
-    paddingTop: 100
+    alignItems: 'center'
+  },
+  containerStretch: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'stretch'
   },
   logo: {
+    marginTop: 100,
     width: 100,
     height: 100
   },
@@ -126,5 +153,7 @@ const styles = StyleSheet.create({
     marginTop: 20
   }
 });
+
+const webviewJS = "";
 
 AppRegistry.registerComponent('OneBodyMobile', () => OneBodyMobile);
