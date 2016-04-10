@@ -1,4 +1,4 @@
-import React, {
+import React, { // eslint-disable-line no-unused-vars
   AppRegistry,
   AsyncStorage,
   Component,
@@ -12,6 +12,7 @@ import React, {
 } from 'react-native';
 
 import WebViewProxy from './ios/web_view_proxy';
+import Nav from './components/nav';
 
 class OneBodyMobile extends Component {
   constructor() {
@@ -21,16 +22,16 @@ class OneBodyMobile extends Component {
       go: false,
       loaded: false,
       html: '',
-      baseUrl: ''
+      actualUrl: null // TODO: how to get this???
     };
   }
 
   componentDidMount() {
     WebViewProxy.setup();
     AsyncStorage.multiGet(['url', 'go'], (err, result) => {
-      const [[,url], [,go]] = result;
+      const [[,baseUrl], [,go]] = result;
       const goBool = (go == 'true');
-      this.setState({url, go: goBool, loaded: true});
+      this.setState({baseUrl, url: baseUrl, go: goBool, loaded: true});
     });
   }
 
@@ -49,7 +50,7 @@ class OneBodyMobile extends Component {
             style={styles.webView}
             source={{url: this.state.go ? this.state.url : null}}
             onLoadHtml={this.handleLoadHtml.bind(this)}/>
-          <Text>nice</Text>
+          <Nav onPress={this.handleNavPress.bind(this)} url={this.state.actualUrl}/>
         </View>
       );
     } else {
@@ -68,7 +69,7 @@ class OneBodyMobile extends Component {
           <TextInput
             ref="urlInput"
             style={styles.urlInput}
-            value={this.state.url}
+            value={this.state.baseUrl}
             placeholder="members.mychurch.com"
             keyboardType="url"
             onChange={(e) => this.setState({url: e.nativeEvent.text})}
@@ -76,7 +77,7 @@ class OneBodyMobile extends Component {
             autoCapitalize="none"
             autoFocus/>
           <TouchableHighlight
-            onPress={this.handleGoClick.bind(this)}>
+            onPress={this.handleGoPress.bind(this)}>
             <View>
               <Text style={styles.urlButton}>Go!</Text>
             </View>
@@ -86,12 +87,24 @@ class OneBodyMobile extends Component {
     }
   }
 
-  handleGoClick() {
-    let url = this.state.url;
-    if (!url.match(/\Ahttp:\/\//))
-      url = 'http://' + url;
-    this.setState({url, go: true});
-    AsyncStorage.multiSet([['url', url], ['go', 'true']]);
+  handleGoPress() {
+    let { baseUrl } = this.state;
+    if (!baseUrl.match(/\Ahttp:\/\//))
+      baseUrl = 'http://' + baseUrl;
+    this.setState({baseUrl, url: baseUrl, go: true});
+    AsyncStorage.multiSet([['url', baseUrl], ['go', 'true']]);
+  }
+
+  handleNavPress(id) {
+    const path = {
+      home:      '/',
+      directory: '/search',
+      groups:    '/groups',
+      me:        '/people'
+    }[id];
+    this.setState({
+      url: this.state.baseUrl + path + '#' + Math.random() // force webview to update with random number
+    });
   }
 
   handleLoadHtml(html) {
@@ -153,7 +166,5 @@ const styles = StyleSheet.create({
     marginTop: 20
   }
 });
-
-const webviewJS = "";
 
 AppRegistry.registerComponent('OneBodyMobile', () => OneBodyMobile);

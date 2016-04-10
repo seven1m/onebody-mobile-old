@@ -9,7 +9,10 @@ export default {
       'WebRequest',
       ({id, status, headers, data}) => {
         if (headers['Content-Type'].match(/^text\/html/)) {
-          data = data.replace(/<header[^]*<\/header>/m, '');
+          data = data
+                 .replace(/<header[^]*<\/header>/m, '')
+                 .replace(/<footer[^]*<\/footer>/m, '')
+                 .replace(/<div class='main-footer no-margin-left'>\n\s*<ul class='footer-links[^]*<\/ul>[^]*?<\/div>/m, '');
         }
         WebViewProxyManager.sendResponse(id, status, headers, data);
       }
