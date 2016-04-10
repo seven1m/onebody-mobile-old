@@ -22,7 +22,7 @@ class OneBodyMobile extends Component {
       go: false,
       loaded: false,
       html: '',
-      actualUrl: null // TODO: how to get this???
+      actualUrl: null
     };
   }
 
@@ -49,8 +49,10 @@ class OneBodyMobile extends Component {
             startInLoadingState={true}
             style={styles.webView}
             source={{url: this.state.go ? this.state.url : null}}
-            onLoadHtml={this.handleLoadHtml.bind(this)}/>
-          <Nav onPress={this.handleNavPress.bind(this)} url={this.state.actualUrl}/>
+            onNavigationStateChange={this.handleUpdateActualUrl.bind(this)}/>
+          <Nav
+            onPress={this.handleNavPress.bind(this)}
+            url={this.state.actualUrl}/>
         </View>
       );
     } else {
@@ -107,8 +109,8 @@ class OneBodyMobile extends Component {
     });
   }
 
-  handleLoadHtml(html) {
-    return html.replace(/<header[^]*<\/header>/m, '');
+  handleUpdateActualUrl({url}) {
+    this.setState({actualUrl: url});
   }
 }
 
