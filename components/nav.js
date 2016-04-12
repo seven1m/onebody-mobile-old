@@ -29,13 +29,22 @@ class Nav extends Component {
       return 'directory';
     } else if (path.match(/^\/groups/)) {
       return 'groups';
+    } else if (this.isProfilePath(path)) {
+      return 'me';
     }
+  }
+
+  isProfilePath(path) {
+    if (!this.props.profilePath) return false;
+    console.log(path, this.props.profilePath);
+    return path.match(RegExp('^' + this.props.profilePath));
   }
 }
 
 Nav.propTypes = {
-  onPress: PropTypes.func.isRequired,
-  url:     PropTypes.string
+  onPress:     PropTypes.func.isRequired,
+  url:         PropTypes.string,
+  profilePath: PropTypes.string
 };
 
 const styles = StyleSheet.create({

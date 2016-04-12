@@ -22,12 +22,14 @@ class OneBodyMobile extends Component {
       go: false,
       loaded: false,
       html: '',
-      actualUrl: null
+      actualUrl: null,
+      profilePath: null
     };
   }
 
   componentDidMount() {
     WebViewProxy.setup();
+    WebViewProxy.onProfilePathUpdate = this.handleUpdateProfilePath.bind(this);
     AsyncStorage.multiGet(['url', 'go'], (err, result) => {
       const [[,baseUrl], [,go]] = result;
       const goBool = (go == 'true');
@@ -52,7 +54,8 @@ class OneBodyMobile extends Component {
             onNavigationStateChange={this.handleUpdateActualUrl.bind(this)}/>
           <Nav
             onPress={this.handleNavPress.bind(this)}
-            url={this.state.actualUrl}/>
+            url={this.state.actualUrl}
+            profilePath={this.state.profilePath}/>
         </View>
       );
     } else {
@@ -102,7 +105,7 @@ class OneBodyMobile extends Component {
       home:      '/',
       directory: '/search',
       groups:    '/groups',
-      me:        '/people'
+      me:        this.state.profilePath || '/people'
     }[id];
     this.setState({
       url: this.state.baseUrl + path + '#' + Math.random() // force webview to update with random number
@@ -111,6 +114,10 @@ class OneBodyMobile extends Component {
 
   handleUpdateActualUrl({url}) {
     this.setState({actualUrl: url});
+  }
+
+  handleUpdateProfilePath(path) {
+    this.setState({profilePath: path});
   }
 }
 

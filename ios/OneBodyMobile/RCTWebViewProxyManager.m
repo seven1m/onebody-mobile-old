@@ -15,12 +15,16 @@ RCT_EXPORT_METHOD(handleRequestsMatching:(NSString *)pattern)
 {
   responses = [[NSMutableDictionary alloc] init];
   [WebViewProxy handleRequestsMatching:[NSPredicate predicateWithFormat:@"absoluteString like %@", pattern] handler:^(NSURLRequest* req, WVPResponse *res) {
+
     NSString *url = req.URL.absoluteString;
     NSMutableURLRequest *proxyReq = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
     [proxyReq setHTTPMethod: req.HTTPMethod];
     [proxyReq setHTTPBody: req.HTTPBody];
-    NSOperationQueue* queue = [NSOperationQueue new];
-    [NSURLConnection sendAsynchronousRequest:proxyReq queue:queue completionHandler:^(NSURLResponse* proxyRes, NSData* proxyData, NSError* proxyErr) {
+
+    NSURLSession *session = [NSURLSession sharedSession];
+    NSURLSessionDataTask *task = [session dataTaskWithRequest:proxyReq
+                                            completionHandler:
+                                            ^(NSData *proxyData, NSURLResponse *proxyRes, NSError *proxyErr) {
       if (proxyErr) {
         [res pipeError:proxyErr];
       } else {
@@ -36,8 +40,9 @@ RCT_EXPORT_METHOD(handleRequestsMatching:(NSString *)pattern)
                                                             @"status": [NSNumber numberWithInteger:statusCode],
                                                             @"headers": headers,
                                                             @"data": data}];
-      }
+        }
     }];
+    [task resume];
   }];
 }
 
