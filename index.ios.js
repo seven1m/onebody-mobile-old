@@ -13,6 +13,7 @@ import React, { // eslint-disable-line no-unused-vars
 
 import WebViewProxy from './ios/web_view_proxy';
 import Nav from './components/nav';
+import Setup from './components/setup';
 
 class OneBodyMobile extends Component {
   constructor() {
@@ -60,42 +61,17 @@ class OneBodyMobile extends Component {
       );
     } else {
       return (
-        <View style={styles.container}>
-          <Image
-            style={styles.logo}
-            source={require('./images/logo.png')}
-            resizeMode="contain"/>
-          <Text style={styles.heading}>
-            OneBody
-          </Text>
-          <Text style={styles.instructions}>
-            Enter your church community URL below:
-          </Text>
-          <TextInput
-            ref="urlInput"
-            style={styles.urlInput}
-            value={this.state.baseUrl}
-            placeholder="members.mychurch.com"
-            keyboardType="url"
-            onChange={(e) => this.setState({url: e.nativeEvent.text})}
-            autoCorrect={false}
-            autoCapitalize="none"
-            autoFocus/>
-          <TouchableHighlight
-            onPress={this.handleGoPress.bind(this)}>
-            <View>
-              <Text style={styles.urlButton}>Go!</Text>
-            </View>
-          </TouchableHighlight>
-        </View>
+        <Setup
+          baseUrl={this.state.baseUrl}
+          onGoPress={this.handleGoPress.bind(this)}
+          onChangeURL={(e) => this.setState({baseUrl: e.nativeEvent.text})}/>
       );
     }
   }
 
   handleGoPress() {
     let { baseUrl } = this.state;
-    if (!baseUrl.match(/\Ahttp:\/\//))
-      baseUrl = 'http://' + baseUrl;
+    if (!baseUrl.match(/\Ahttp:\/\//)) baseUrl = 'http://' + baseUrl;
     this.setState({baseUrl, url: baseUrl, go: true});
     AsyncStorage.multiSet([['url', baseUrl], ['go', 'true']]);
   }
@@ -122,54 +98,10 @@ class OneBodyMobile extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center'
-  },
   containerStretch: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'stretch'
-  },
-  logo: {
-    marginTop: 100,
-    width: 100,
-    height: 100
-  },
-  heading: {
-    fontSize: 30,
-    textAlign: 'center',
-    margin: 10,
-    marginBottom: 20
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333',
-    marginBottom: 5
-  },
-  discreetInstructions: {
-    textAlign: 'center',
-    color: '#999',
-    marginBottom: 5
-  },
-  urlInput: {
-    textAlign: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    height: 35,
-    marginLeft: 25,
-    marginRight: 25,
-    padding: 10
-  },
-  urlButton: {
-    textAlign: 'center',
-    borderWidth: 1,
-    backgroundColor: '#5b80a6',
-    marginTop: 10,
-    color: '#fff',
-    height: 35,
-    padding: 10
   },
   webView: {
     marginTop: 20
