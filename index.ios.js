@@ -2,11 +2,7 @@ import React, { // eslint-disable-line no-unused-vars
   AppRegistry,
   AsyncStorage,
   Component,
-  Image,
   StyleSheet,
-  Text,
-  TextInput,
-  TouchableHighlight,
   View,
   WebView
 } from 'react-native';
