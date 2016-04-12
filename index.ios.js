@@ -71,7 +71,7 @@ class OneBodyMobile extends Component {
 
   handleGoPress() {
     let { baseUrl } = this.state;
-    if (!baseUrl.match(/\Ahttp:\/\//)) baseUrl = 'http://' + baseUrl;
+    if (!baseUrl.match(/^https?:\/\//)) baseUrl = 'http://' + baseUrl;
     this.setState({baseUrl, url: baseUrl, go: true});
     AsyncStorage.multiSet([['url', baseUrl], ['go', 'true']]);
   }
