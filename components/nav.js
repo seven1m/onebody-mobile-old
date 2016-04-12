@@ -36,7 +36,6 @@ class Nav extends Component {
 
   isProfilePath(path) {
     if (!this.props.profilePath) return false;
-    console.log(path, this.props.profilePath);
     return path.match(RegExp('^' + this.props.profilePath));
   }
 }

@@ -8,7 +8,6 @@ export default {
     subscription = NativeAppEventEmitter.addListener(
       'WebRequest',
       ({id, url, status, headers, data}) => {
-        console.log(url);
         if (headers['Content-Type'].match(/^text\/html/)) {
           const match = data.match(/<a.*?href="(\/people\/\d+)">View Profile/);
           if (this.onProfilePathUpdate && match) this.onProfilePathUpdate(match[1]);

@@ -8,6 +8,7 @@ import React, { // eslint-disable-line no-unused-vars
 } from 'react-native';
 
 import WebViewProxy from './ios/web_view_proxy';
+import Loading from './components/loading';
 import Nav from './components/nav';
 import Setup from './components/setup';
 
@@ -20,7 +21,9 @@ class OneBodyMobile extends Component {
       loaded: false,
       html: '',
       actualUrl: null,
-      profilePath: null
+      profilePath: null,
+      loadingProgress: 0,
+      loadingActive: false
     };
   }
 
@@ -43,16 +46,23 @@ class OneBodyMobile extends Component {
       return <View/>;
     } else if (this.state.go) {
       return (
-        <View style={styles.containerStretch}>
+        <View style={styles.container}>
           <WebView
             startInLoadingState={true}
             style={styles.webView}
             source={{url: this.state.go ? this.state.url : null}}
-            onNavigationStateChange={this.handleUpdateActualUrl.bind(this)}/>
+            onNavigationStateChange={this.handleUpdateActualURL.bind(this)}
+            onLoadStart={this.handleStartLoad.bind(this)}
+            onLoadEnd={this.handleFinishLoad.bind(this)}/>
           <Nav
             onPress={this.handleNavPress.bind(this)}
             url={this.state.actualUrl}
             profilePath={this.state.profilePath}/>
+          <View style={styles.progressContainer}>
+            <Loading
+              progress={this.state.loadingProgress}
+              active={this.state.loadingActive}/>
+          </View>
         </View>
       );
     } else {
@@ -84,8 +94,16 @@ class OneBodyMobile extends Component {
     });
   }
 
-  handleUpdateActualUrl({url}) {
+  handleUpdateActualURL({url}) {
     this.setState({actualUrl: url});
+  }
+
+  handleStartLoad() {
+    this.setState({loadingProgress: 0.75, loadingActive: true});
+  }
+
+  handleFinishLoad() {
+    this.setState({loadingProgress: 1, loadingActive: false});
   }
 
   handleUpdateProfilePath(path) {
@@ -94,13 +112,22 @@ class OneBodyMobile extends Component {
 }
 
 const styles = StyleSheet.create({
-  containerStretch: {
+  container: {
+    marginTop: 20,
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'stretch'
   },
+
   webView: {
-    marginTop: 20
+  },
+
+  progressContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: 2,
+    right: 0
   }
 });
 
