@@ -6,6 +6,8 @@ import React, { // eslint-disable-line no-unused-vars
   View
 } from 'react-native';
 
+import { colors } from '../constants';
+
 class Loading extends Component {
   constructor(props) {
     super(props);
@@ -71,7 +73,7 @@ const styles = StyleSheet.create({
   },
 
   on: {
-    backgroundColor: '#39F'
+    backgroundColor: colors.loading
   }
 });
 

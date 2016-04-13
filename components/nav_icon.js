@@ -6,10 +6,8 @@ import React, { // eslint-disable-line no-unused-vars
   View
 } from 'react-native';
 
-let Icon = require('react-native-vector-icons/FontAwesome');
-
-const activeColor   = '#39F';
-const inactiveColor = '#999';
+import { colors } from '../constants';
+const Icon = require('react-native-vector-icons/FontAwesome');
 
 class NavIcon extends Component {
   render() {
@@ -17,21 +15,39 @@ class NavIcon extends Component {
       <View style={styles.container}>
         <Icon
           name={this.props.name}
-          size={25}
-          color={this.props.isActive ? activeColor : inactiveColor}
+          size={this.props.size}
+          color={this.props.isActive ? this.props.activeColor : this.props.inactiveColor}
           onPress={this.props.onPress}/>
-        <Text
-          style={[styles.label, this.props.isActive && styles.activeLabel]}
-          onPress={this.props.onPress}>
-          {this.props.label}
-        </Text>
+        {this.renderLabel()}
       </View>
+    );
+  }
+
+  renderLabel() {
+    if (!this.props.label) return;
+    return (
+      <Text
+        style={[styles.label, {color: this.props.isActive ? this.props.activeColor : this.props.inactiveColor}]}
+        onPress={this.props.onPress}>
+        {this.props.label}
+      </Text>
     );
   }
 }
 
 NavIcon.propTypes = {
+  name: PropTypes.string.isRequired,
+  size: PropTypes.number,
+  label: PropTypes.string,
+  activeColor: PropTypes.string,
+  inactiveColor: PropTypes.string,
   onPress: PropTypes.func.isRequired
+};
+
+NavIcon.defaultProps = {
+  activeColor: colors.main,
+  size: 25,
+  inactiveColor: '#999'
 };
 
 const styles = StyleSheet.create({
@@ -40,11 +56,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   label: {
-    fontSize: 10,
-    color: inactiveColor
-  },
-  activeLabel: {
-    color: activeColor
+    fontSize: 10
   }
 });
 
