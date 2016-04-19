@@ -10,6 +10,7 @@ import React, { // eslint-disable-line no-unused-vars
 
 import { colors } from './constants';
 import WebViewProxy from './ios/web_view_proxy';
+import WebViewBridge from 'react-native-webview-bridge';
 import Loading from './components/loading';
 import Title from './components/title';
 import Nav from './components/nav';
@@ -51,24 +52,18 @@ class OneBodyMobile extends Component {
     } else if (this.state.go) {
       return (
         <View style={styles.container}>
-          <StatusBar barStyle="light-content"/>
-          <View style={styles.statusBarBackground}/>
-          <Title
-            onBack={this.handleBack.bind(this)}
-            showBack={this.state.canGoBack}
-            onSearch={this.handleSearch.bind(this)}/>
-          <WebView
+          {this.renderStatusBar()}
+          {this.renderTitle()}
+          <WebViewBridge
             ref="webView"
             startInLoadingState={true}
             style={styles.webView}
             source={{url: this.state.go ? this.state.url : null}}
+            injectedJavaScript={this.getInjectScript()}
             onNavigationStateChange={this.handleUpdateActualURL.bind(this)}
             onLoadStart={this.handleStartLoad.bind(this)}
             onLoadEnd={this.handleFinishLoad.bind(this)}/>
-          <Nav
-            onPress={this.handleNavPress.bind(this)}
-            url={this.state.actualUrl}
-            profilePath={this.state.profilePath}/>
+          {this.renderNav()}
           <View style={styles.progressContainer}>
             <Loading
               progress={this.state.loadingProgress}
@@ -84,6 +79,36 @@ class OneBodyMobile extends Component {
           onChangeURL={(e) => this.setState({baseUrl: e.nativeEvent.text})}/>
       );
     }
+  }
+
+  renderStatusBar() {
+    if (!this.shouldShowChrome()) return;
+    return (
+      <View style={styles.statusBarBackground}>
+        <StatusBar barStyle="light-content"/>
+      </View>
+    );
+  }
+
+  renderTitle() {
+    if (!this.shouldShowChrome()) return;
+    return (
+      <Title
+        onBackPress={this.handleBackPress.bind(this)}
+        onMenuPress={this.handleMenuPress.bind(this)}
+        showBack={this.shouldShowBack()}
+        onSearch={this.handleSearch.bind(this)}/>
+    );
+  }
+
+  renderNav() {
+    if (!this.shouldShowChrome()) return;
+    return (
+      <Nav
+        onPress={this.handleNavPress.bind(this)}
+        url={this.state.actualUrl}
+        profilePath={this.state.profilePath}/>
+    );
   }
 
   handleGoPress() {
@@ -121,13 +146,52 @@ class OneBodyMobile extends Component {
     this.setState({profilePath: path});
   }
 
-  handleBack() {
+  handleBackPress() {
     this.refs.webView.goBack();
+  }
+
+  handleMenuPress() {
+    this.refs.webView.sendToBridge('showMenu');
   }
 
   handleSearch(value) {
     const url = `${this.state.baseUrl}/search?name=${value}`;
     this.setState({url});
+  }
+
+  shouldShowChrome() {
+    return !!this.state.profilePath;
+  }
+
+  shouldShowBack() {
+    if (!this.state.canGoBack) return false;
+    const path = this.state.actualUrl.replace(this.state.baseUrl, '').split('#')[0];
+    return ['/', '/search', '/groups', this.state.profilePath].indexOf(path) == -1;
+  }
+
+  getInjectScript() {
+    return `
+      function webViewBridgeReady(cb) {
+        if (window.WebViewBridge) return cb(window.WebViewBridge);
+        function handler() {
+          document.removeEventListener('WebViewBridge', handler, false);
+          cb(window.WebViewBridge);
+        }
+        document.addEventListener('WebViewBridge', handler, false);
+      }
+
+      webViewBridgeReady(function(webViewBridge) {
+        webViewBridge.onMessage = function(message) {
+          if (message === 'showMenu') {
+            if ($('body').hasClass('sidebar-open')) {
+              $('body').removeClass('sidebar-open').removeClass('sidebar-collapse').trigger('collapsed.pushMenu');
+            } else {
+              $('body').addClass('sidebar-open').trigger('expanded.pushMenu');
+            }
+          }
+        };
+      });
+    `;
   }
 }
 

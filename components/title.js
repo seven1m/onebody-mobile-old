@@ -14,7 +14,7 @@ class Title extends Component {
     return (
       <View style={styles.container}>
         <View style={styles.spacer}>
-          {this.renderBack()}
+          {this.renderBackOrMenuButton()}
         </View>
         <Search onSearch={this.props.onSearch}/>
         <View style={styles.spacer}/>
@@ -22,15 +22,27 @@ class Title extends Component {
     );
   }
 
-  renderBack() {
-    if (!this.props.showBack) return;
-    return <NavIcon name="chevron-left" size={18} onPress={this.props.onBack} activeColor="#FFF" isActive={true}/>;
+  renderBackOrMenuButton() {
+    if (this.props.showBack) {
+      return this.renderBackButton();
+    } else {
+      return this.renderMenuButton();
+    }
+  }
+
+  renderBackButton() {
+    return <NavIcon name="chevron-left" size={18} onPress={this.props.onBackPress} activeColor="#FFF" isActive={true}/>;
+  }
+
+  renderMenuButton() {
+    return <NavIcon name="bars" size={18} onPress={this.props.onMenuPress} activeColor="#FFF" isActive={true}/>;
   }
 }
 
 Title.propTypes = {
   showBack: PropTypes.bool.isRequired,
-  onBack: PropTypes.func.isRequired,
+  onBackPress: PropTypes.func.isRequired,
+  onMenuPress: PropTypes.func.isRequired,
   onSearch: PropTypes.func.isRequired
 };
 

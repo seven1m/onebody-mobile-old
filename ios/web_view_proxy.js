@@ -7,14 +7,15 @@ export default {
   setup() {
     subscription = NativeAppEventEmitter.addListener(
       'WebRequest',
-      ({id, url, status, headers, data}) => {
+      ({id, status, headers, data}) => {
         if (headers['Content-Type'].match(/^text\/html/)) {
           const match = data.match(/<a.*?href="(\/people\/\d+)">View Profile/);
           if (this.onProfilePathUpdate && match) this.onProfilePathUpdate(match[1]);
           data = data
                  .replace(/<header[^]*<\/header>/m, '')
                  .replace(/<footer[^]*<\/footer>/m, '')
-                 .replace(/<div class='main-footer no-margin-left'>\n\s*<ul class='footer-links[^]*<\/ul>[^]*?<\/div>/m, '');
+                 .replace(/<div class='main-footer no-margin-left'>\n\s*<ul class='footer-links[^]*<\/ul>[^]*?<\/div>/m, '')
+                 .replace(/<\/head>/, '<style>.main-sidebar, .left-side { padding-top: 0; }</style>');
         }
         WebViewProxyManager.sendResponse(id, status, headers, data);
       }
