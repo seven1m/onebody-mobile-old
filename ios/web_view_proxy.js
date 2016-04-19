@@ -15,7 +15,7 @@ export default {
                  .replace(/<header[^]*<\/header>/m, '')
                  .replace(/<footer[^]*<\/footer>/m, '')
                  .replace(/<div class='main-footer no-margin-left'>\n\s*<ul class='footer-links[^]*<\/ul>[^]*?<\/div>/m, '')
-                 .replace(/<\/head>/, '<style>.main-sidebar, .left-side { padding-top: 0; }</style>');
+                 .replace(/<\/head>/, '<style>.main-sidebar, .left-side { position: fixed; padding-top: 0; }</style>');
         }
         WebViewProxyManager.sendResponse(id, status, headers, data);
       }
